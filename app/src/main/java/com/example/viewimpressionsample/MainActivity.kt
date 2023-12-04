@@ -8,10 +8,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -59,25 +58,30 @@ fun TestGrid(modifier: Modifier = Modifier) {
         R.drawable.cat14,
         R.drawable.cat15,
         R.drawable.cat16,
-        ).apply { random() }
+    ).run { shuffled() }
 
     val spacedArrangement = Arrangement.spacedBy(1.dp)
-    LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2), modifier.fillMaxSize(),
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = modifier.fillMaxSize(),
         horizontalArrangement = spacedArrangement,
-        verticalItemSpacing = 1.dp) {
-        items(catList) {
-            CatPhotoCell(drawableRes = it)
+        verticalArrangement = spacedArrangement,
+    ) {
+        itemsIndexed(catList) { index, item ->
+            CatPhotoCell(index = index, drawableRes = item)
         }
     }
 }
 
 @Composable
-fun CatPhotoCell(drawableRes: Int) {
-    Image(painter = painterResource(id = drawableRes), contentDescription = "cat",
-        contentScale = ContentScale.Crop,
+fun CatPhotoCell(index: Int, drawableRes: Int) {
+    Image(
+        painter = painterResource(id = drawableRes), contentDescription = "cat",
+        contentScale = ContentScale.Fit,
         modifier = Modifier
-        .fillMaxWidth()
-        .height(100.dp + (100 * Math.random()).dp))
+            .fillMaxWidth()
+            .viewImpression(index)
+    )
 }
 
 @Preview(showBackground = true)
