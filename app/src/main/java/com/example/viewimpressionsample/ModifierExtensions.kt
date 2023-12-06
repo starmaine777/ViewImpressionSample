@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.example.viewimpressionsample
 
 import androidx.compose.runtime.Composable
@@ -6,15 +8,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.DrawModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.platform.InspectorValueInfo
 import androidx.compose.ui.platform.debugInspectorInfo
 import com.example.viewimpressionsample.ui.theme.VImpComplete
 import com.example.viewimpressionsample.ui.theme.VImpInProgress
@@ -61,17 +64,44 @@ enum class ImpressionState(val color: Color) {
 
 
 fun Modifier.foreground(color: Color): Modifier =
-    this then (Foreground(color, debugInspectorInfo {
+    this then (ForegroundElement(color, debugInspectorInfo {
         name = "foreground"
         value = color
         properties["color"] = color
     }))
 
+private class ForegroundElement(
+    private val color: Color = Color.Unspecified,
+    private val inspectorInfo: InspectorInfo.() -> Unit
+) : ModifierNodeElement<ForegroundNode>() {
+    override fun create(): ForegroundNode {
+        return ForegroundNode(
+            color,
+        )
+    }
 
-private class Foreground(
-    private val color: Color,
-    inspectorInfo: InspectorInfo.() -> Unit
-) : DrawModifier, InspectorValueInfo(inspectorInfo) {
+
+    override fun update(node: ForegroundNode): ForegroundNode {
+        node.color = color
+        return node
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        inspectorInfo()
+    }
+
+    override fun hashCode(): Int = color.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        val otherModifier = other as? ForegroundNode ?: return false
+        return color == otherModifier.color
+    }
+}
+
+
+private class ForegroundNode(
+    var color: Color,
+) : DrawModifierNode, Modifier.Node() {
     override fun ContentDrawScope.draw() {
         drawContent()
         drawRect(color)
