@@ -12,7 +12,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.node.DrawModifierNode
@@ -39,10 +38,10 @@ fun Modifier.viewImpression(id: Int): Modifier {
     return this then
             onGloballyPositioned { lc ->
                 val visible = lc.boundsInWindow()
-                val fullView = lc.boundsInParent()
+                val fullView = lc.size
                 val heightPercent = visible.height / fullView.height
-
-                if (visible.height / fullView.height >= 0.5) {
+                
+                if (heightPercent >= 0.5) {
                     if (state == ImpressionState.NOT_IMPRESSION) {
                         state = ImpressionState.IN_PROGRESS
                     }
@@ -79,7 +78,6 @@ private class ForegroundElement(
             color,
         )
     }
-
 
     override fun update(node: ForegroundNode): ForegroundNode {
         node.color = color
